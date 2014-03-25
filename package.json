@@ -1,0 +1,24 @@
+{
+  "name": "etrade",
+  "version": "0.0.1",
+  "description": "Use E*TRADE's REST API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/theidealist/node-etrade-api.git"
+  },
+  "keywords": [
+    "etrade",
+    "api",
+    "rest"
+  ],
+  "author": "Patrick McMichael <mcmichaelps1@gmail.com>",
+  "license": "BSD",
+  "dependencies": {
+    "oauth-sign": "0.4.x",
+    "request" : "2.34.x",
+  }
+}

@@ -1,4 +1,4 @@
 node-etrade-api
 ===============
 
-A Node.js module for using the E*TRADE REST API.
+A nodejs client for the E*TRADE web services API
