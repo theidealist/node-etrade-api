@@ -19,6 +19,9 @@
   "license": "BSD",
   "dependencies": {
     "oauth-sign": "0.4.x",
-    "request" : "2.34.x",
+    "request" : "2.34.x"
+  }, 
+  "devDependencies": {
+    "colors" : "*"
   }
 }
