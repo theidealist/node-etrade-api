@@ -1,15 +1,13 @@
 var etrade = require('./index');
 var options = require('./test-keys.js'); // Uncommited file.  It has valid E*TRADE keys that are not shareable
 
+// Other nodejs modules
 var readline = require('readline');
 
-
+options.useSandbox = true;              // Please don't run this against the live servers
 var et = new etrade(options);
 
-var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+var rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 function errorCallback(errorLevel,error)
 {
@@ -35,10 +33,10 @@ tests.push(function() { et.renewAccessToken(next(),getErrorCallbackFor("RenewAcc
 tests.push(function() { console.log("Renewed access token"); next()(); });
 
 // Accounts module
+var displayAccountsResult = false;
 var accounts = [];
 var transactions = [];
 var alerts = [];
-var displayAccountsResult = false;
 
 tests.push(function() { et.listAccounts(next(),getErrorCallbackFor("ListAccounts")); });
 if (displayAccountsResult) tests.push(function(accountList) { console.log("AccountList: " + JSON.stringify(accountList)); next()(accountList); });
@@ -63,22 +61,36 @@ if (displayAccountsResult) tests.push(function(alert) { console.log("Alert: " + 
 
 // Note: deleteAlerts is currently failing.  I think it has to do with using DELETE HTTP verb
 //       figure out later!
-//tests.push(function() { et.deleteAlert(alerts[0].alertId,next(),getErrorCallbackFor("DeleteAlert")); });
-//tests.push(function(deleteResponse) { console.log("DeleteResult: " + JSON.stringify(deleteResponse)); next()(); });
+tests.push(function() { et.deleteAlert(alerts[0].alertId,next(),getErrorCallbackFor("DeleteAlert")); });
+if (displayAccountsResult) tests.push(function(deleteResponse) { console.log("DeleteResult: " + JSON.stringify(deleteResponse)); next()(); });
 
 tests.push(function() { next()(); });
 
 // Order module
+var displayOrderResults = false;
 var orders = [];
-tests.push(function() { et.listOrders(accounts[0].accountId,next(),getErrorCallbackFor("ListOrders")); });
-tests.push(function(orderList) { console.log("OrderList: " + JSON.stringify(orderList)); next()(orderList); });
-tests.push(function(orderList) { next()(); });
+var getPreviewEquityOrderParams = function() { return { 
+    accountId : accounts[0].accountId,
+    symbol : "GOOG",
+    orderAction : "BUY",
+    clientOrderId : "AnOrderId",
+    priceType : "MARKET",
+    quantity : 20,
+    marketSession : "REGULAR",
+    orderTerm : "GOOD_FOR_DAY"
+}; };
 
+tests.push(function() { et.listOrders(accounts[0].accountId,next(),getErrorCallbackFor("ListOrders")); });
+if (displayOrderResults) tests.push(function(orderList) { console.log("OrderList: " + JSON.stringify(orderList)); next()(orderList); });
+tests.push(function(orderList) { orders=orderList.GetOrderListResponse.orderDetails; next()(); });
+tests.push(function() { et.previewEquityOrder(getPreviewEquityOrderParams(),next(),getErrorCallbackFor("PreviewEquityOrder")); });
+if (displayOrderResults) tests.push(function(orderPreview) { console.log("OrderPreview: " + JSON.stringify(orderPreview)); next()(orderPreview); });
+tests.push(function() { next()(); });
 
 // Close up shop
 tests.push(function() { et.revokeAccessToken(next(),getErrorCallbackFor("RevokeAccessToken")); });
 tests.push(function() { console.log("Token revoked."); next()(); });
-tests.push(function() { console.log("Tests Completed Successfully"); process.exit(0); });
+tests.push(function() { console.log("Tests Completed"); process.exit(0); });
 
 // Kick it!
 next()();
