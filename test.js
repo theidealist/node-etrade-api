@@ -1,96 +1,54 @@
-var etrade = require('./index');
-var options = require('./test-keys.js'); // Uncommited file.  It has valid E*TRADE keys that are not shareable
 
 // Other nodejs modules
 var readline = require('readline');
 
+// Our principal nodejs module
+var etrade = require('./index');
+
+// The keys to the castle
+var options = require('./test-keys.js'); // Uncommited file.  It has valid E*TRADE keys that are not shareable
 options.useSandbox = true;              // Please don't run this against the live servers
-var et = new etrade(options);
 
-var rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-
-function errorCallback(errorLevel,error)
+// A basic test harness for running tests with a little bit of shared state
+var TestHarness = function()
 {
-    console.error("Error in '" + errorLevel + "': " + error);
-    process.exit(-1);
-}
+    this.et = new etrade(options);
+    this.rl = rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    this.tests = [];
+    this.shared = {}; // For shared context (account list, etc.)
+};
 
-function getErrorCallbackFor(errorLevel)
+TestHarness.prototype.getErrorCallbackFor =  function(errorLabel)
 {
-    return function(error) { return errorCallback(errorLevel,error); };
-}
+    if (arguments.length < 1) errorLabel = "Unknown";
+    
+    return function(error)
+    {
+        console.error(errorLabel + ": " + error);
+        process.exit(-1);
+    };
+};
 
-tests = [];
-var next = function() { return tests.shift(); };
+TestHarness.prototype.next = function()
+{
+    return this.tests.shift().bind(this);
+};
 
-// Authorization module
-tests.push(function() { et.getRequestToken(next(),getErrorCallbackFor("GetRequestToken")); });
-tests.push(function(url) { console.log("Authorize at: " + url); next()(); });
-tests.push(function() { rl.question("Verification Code? ",next()); });
-tests.push(function(verifier) { et.getAccessToken(verifier,next(),getErrorCallbackFor("GetAccessToken")); });
-tests.push(function() { console.log("Got an access token"); next()(); });
-tests.push(function() { et.renewAccessToken(next(),getErrorCallbackFor("RenewAccessToken")); });
-tests.push(function() { console.log("Renewed access token"); next()(); });
+// Instantiate our test harness type
+var testHarness = new TestHarness();
 
-// Accounts module
-var displayAccountsResult = false;
-var accounts = [];
-var transactions = [];
-var alerts = [];
+var testModules = [ require('./tests/authorization.js'),
+                     require('./tests/accounts.js'),
+                     require('./tests/order.js') ];
 
-tests.push(function() { et.listAccounts(next(),getErrorCallbackFor("ListAccounts")); });
-if (displayAccountsResult) tests.push(function(accountList) { console.log("AccountList: " + JSON.stringify(accountList)); next()(accountList); });
-tests.push(function(accountList) { accounts = accountList["json.accountListResponse"].response; next()(); });
-tests.push(function(account) { et.getAccountBalance(accounts[0].accountId,next(),getErrorCallbackFor("GetAccountBalance")); });
-if (displayAccountsResult) tests.push(function(balance) { console.log("AccountBalance: " + JSON.stringify(balance)); next()(balance);});
-tests.push(function() { et.getAccountPositions({accountId:accounts[0].accountId },next(),getErrorCallbackFor("GetAccountPositions")); });
-if (displayAccountsResult) tests.push(function(positions) { console.log("Positions[" + accounts[0].accountId + "]: " + JSON.stringify(positions)); next()(); });
-tests.push(function() { et.getAccountPositions({accountId:accounts[1].accountId },next(),getErrorCallbackFor("GetAccountPositions")); });
-if (displayAccountsResult) tests.push(function(positions) { console.log("Positions[" + accounts[1].accountId + "]: " + JSON.stringify(positions)); next()(); });
-tests.push(function() { et.getTransactionHistory({accountId:accounts[0].accountId },next(),getErrorCallbackFor("GetTransactionHistory")); });
-if (displayAccountsResult) tests.push(function(history) { console.log("TransactionHistory: " + JSON.stringify(history)); next()(history); });
-tests.push(function(history) { transactions = history["json.transactions"].transactionList; next()(); });
-tests.push(function() { et.getTransactionDetails({accountId:accounts[0].accountId, transactionId:transactions[0].transactionId},
-                         next(),getErrorCallbackFor("GetTransactionDetails")); });
-if (displayAccountsResult) tests.push(function(transaction) { console.log("Transaction: " + JSON.stringify(transaction)); next()(); });
-tests.push(function() { et.listAlerts(next(),getErrorCallbackFor("ListAlerts")); });
-if (displayAccountsResult) tests.push(function(alertList) { console.log("AlertList: " + JSON.stringify(alertList)); next()(alertList); });
-tests.push(function(alertList) { alerts = alertList["json.getAlertsResponse"].response; next()(); });
-tests.push(function() { et.getAlert(alerts[0].alertId,next(),getErrorCallbackFor("GetAlert")); });
-if (displayAccountsResult) tests.push(function(alert) { console.log("Alert: " + JSON.stringify(alert)); next()(); });
-
-// Note: deleteAlerts is currently failing.  I think it has to do with using DELETE HTTP verb
-//       figure out later!
-tests.push(function() { et.deleteAlert(alerts[0].alertId,next(),getErrorCallbackFor("DeleteAlert")); });
-if (displayAccountsResult) tests.push(function(deleteResponse) { console.log("DeleteResult: " + JSON.stringify(deleteResponse)); next()(); });
-
-tests.push(function() { next()(); });
-
-// Order module
-var displayOrderResults = false;
-var orders = [];
-var getPreviewEquityOrderParams = function() { return { 
-    accountId : accounts[0].accountId,
-    symbol : "GOOG",
-    orderAction : "BUY",
-    clientOrderId : "AnOrderId",
-    priceType : "MARKET",
-    quantity : 20,
-    marketSession : "REGULAR",
-    orderTerm : "GOOD_FOR_DAY"
-}; };
-
-tests.push(function() { et.listOrders(accounts[0].accountId,next(),getErrorCallbackFor("ListOrders")); });
-if (displayOrderResults) tests.push(function(orderList) { console.log("OrderList: " + JSON.stringify(orderList)); next()(orderList); });
-tests.push(function(orderList) { orders=orderList.GetOrderListResponse.orderDetails; next()(); });
-tests.push(function() { et.previewEquityOrder(getPreviewEquityOrderParams(),next(),getErrorCallbackFor("PreviewEquityOrder")); });
-if (displayOrderResults) tests.push(function(orderPreview) { console.log("OrderPreview: " + JSON.stringify(orderPreview)); next()(orderPreview); });
-tests.push(function() { next()(); });
+for (var index = 0; index < testModules.length; ++index)
+    testModules[index].registerTests(testHarness);
 
 // Close up shop
-tests.push(function() { et.revokeAccessToken(next(),getErrorCallbackFor("RevokeAccessToken")); });
-tests.push(function() { console.log("Token revoked."); next()(); });
-tests.push(function() { console.log("Tests Completed"); process.exit(0); });
+testHarness.tests.push(function() { 
+    this.et.revokeAccessToken(this.next(),this.getErrorCallbackFor("RevokeAccessToken")); });
+testHarness.tests.push(function() { 
+    console.log("Tests Completed"); process.exit(0); });
 
 // Kick it!
-next()();
+testHarness.next()();
