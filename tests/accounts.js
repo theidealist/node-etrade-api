@@ -1,7 +1,7 @@
 // Tests for the accounts module
 
 var runTests = true;
-var displayResults = false;
+var displayResults = true;
 
 var t = [];         // An array of test functions
 var m = [];         // An array of mandatory test functions (usually later tests depend on these)
