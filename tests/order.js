@@ -39,7 +39,7 @@ t.push(function() { accounts = this.shared.accounts; this.next()(); });
 t.push(function() { this.et.listOrders(accounts[0].accountId,this.next(),this.getErrorCallbackFor("ListOrders")); });
 if (displayResults) t.push(function(orderList) { console.log("OrderList: " + JSON.stringify(orderList)); this.next()(orderList); });
 t.push(function(orderList) { this.shared.orders = orders = orderList.GetOrderListResponse.orderDetails; this.next()(); });
-t.push(function() { previewEquityOrderParams.accountId = equityOrderParams.accountId = accounts[0].accoundId; this.next()(); });
+t.push(function() { previewEquityOrderParams.accountId = equityOrderParams.accountId = accounts[0].accountId; this.next()(); });
 t.push(function() { this.et.previewEquityOrder(previewEquityOrderParams,this.next(),this.getErrorCallbackFor("PreviewEquityOrder")); });
 if (displayResults) t.push(function(orderPreview) { console.log("OrderPreview: " + JSON.stringify(orderPreview)); this.next()(orderPreview); });
 t.push(function(orderPreview) { equityOrderParams.previewId = orderPreview.previewId; this.next()(); });
@@ -47,5 +47,3 @@ t.push(function() { this.et.placeEquityOrder(equityOrderParams,this.next(),this.
 if (displayResults) t.push(function(order) { console.log("Order: " + JSON.stringify(order)); this.next()(order); });
 
 t.push(function() { this.next()(); });
-
-m.push(t[0],t[1],t[3]);
