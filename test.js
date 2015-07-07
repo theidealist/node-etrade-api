@@ -39,7 +39,8 @@ var testHarness = new TestHarness();
 
 var testModules = [ require('./tests/authorization.js'),
                     require('./tests/accounts.js'),
-                    require('./tests/order.js') ];
+                    require('./tests/order.js'),
+                    require('./tests/market.js')];
 
 for (var index = 0; index < testModules.length; ++index)
     testModules[index].registerTests(testHarness);
