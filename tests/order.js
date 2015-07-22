@@ -38,14 +38,14 @@ equityOrderParams = {
 
 t.push(function() { accounts = this.shared.accounts; account0Id = accounts[0].accountId; this.next()(); });
 t.push(function() { this.et.listOrders(account0Id,this.next(),this.getErrorCallbackFor("ListOrders")); });
-if (displayResults) t.push(function(orderList) { console.log("OrderList: " + JSON.stringify(orderList)); this.next()(orderList); });
+if (displayResults) t.push(function(orderList) { console.log("OrderList: " + JSON.stringify(orderList,null,2)); this.next()(orderList); });
 t.push(function(orderList) { this.shared.orders = orders = orderList.GetOrderListResponse.orderDetails; this.next()(); });
 t.push(function() { previewEquityOrderParams.accountId = equityOrderParams.accountId = account0Id; this.next()(); });
 t.push(function() { this.et.previewEquityOrder(previewEquityOrderParams,this.next(),this.getErrorCallbackFor("PreviewEquityOrder")); });
-if (displayResults) t.push(function(orderPreview) { console.log("OrderPreview: " + JSON.stringify(orderPreview)); this.next()(orderPreview); });
+if (displayResults) t.push(function(orderPreview) { console.log("OrderPreview: " + JSON.stringify(orderPreview,null,2)); this.next()(orderPreview); });
 t.push(function(orderPreview) { equityOrderParams.previewId = orderPreview.previewId; this.next()(); });
 t.push(function() { this.et.placeEquityOrder(equityOrderParams,this.next(),this.getErrorCallbackFor("PlaceEquityOrder")); });
-if (displayResults) t.push(function(order) { console.log("Order: " + JSON.stringify(order)); this.next()(order); });
+if (displayResults) t.push(function(order) { console.log("Order: " + JSON.stringify(order,null,2)); this.next()(order); });
 t.push(function(order) { this.next()(); });
 
 // Option Orders
@@ -87,10 +87,10 @@ placeOptionOrderParams = {
 t.push(function() { previewOptionOrderParams.accountId = account0Id; this.next()(); });
 t.push(function() { placeOptionOrderParams.accountId = account0Id; this.next()(); });
 t.push(function() { this.et.previewOptionOrder(previewOptionOrderParams,this.next(),this.getErrorCallbackFor("PreviewOptionOrder")); });
-if (displayResults) t.push(function(res) { console.log("PreviewOptionOrderResponse: " + JSON.stringify(res)); this.next()(res); });
+if (displayResults) t.push(function(res) { console.log("PreviewOptionOrderResponse: " + JSON.stringify(res,null,2)); this.next()(res); });
 t.push(function(res) { previewOptionOrderParams.previewId = res.PreviewOptionOrderResponse.OptionOrderResponse.previewId; this.next()(); });
 t.push(function() { this.et.placeOptionOrder(previewOptionOrderParams,this.next(),this.getErrorCallbackFor("PlaceOptionOrder-1")); });
-if (displayResults) t.push(function(res) { console.log("PlaceOptionOrder-1Response: " + JSON.stringify(res)); this.next()(res); });
+if (displayResults) t.push(function(res) { console.log("PlaceOptionOrder-1Response: " + JSON.stringify(res,null,2)); this.next()(res); });
 t.push(function(res) { this.next()(); });
 
 // Note sure why these cause E*TRADE server to return with an unhelpful HTTP status 500 "The server encountered an internal 
@@ -100,7 +100,7 @@ t.push(function(res) { this.next()(); });
 //t.push(function(res) { this.next()(); });
 
 t.push(function() { this.et.cancelOrder({ accountId : account0Id, orderNum:262 },this.next(),this.getErrorCallbackFor("CancelOrder")); });
-if (displayResults) t.push(function(res) { console.log("CancelOrderResponse: " + JSON.stringify(res)); this.next()(res); });
+if (displayResults) t.push(function(res) { console.log("CancelOrderResponse: " + JSON.stringify(res,null,2)); this.next()(res); });
 t.push(function(res) { this.next()(); });
 
 // All done
