@@ -14,7 +14,7 @@ exports.registerTests = function(th)
 
 previewOptionChainParams = { 
   chainType : "CALL",
-  expirationMonth : 7,
+  expirationMonth : 08,
   expirationYear : 2015,
   underlier : "PCLN",
   skipAdjusted : true 
