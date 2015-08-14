@@ -7,7 +7,7 @@ var etrade = require('./index');
 
 // The keys to the castle
 var options = require('./test-keys.js'); // Uncommited file.  It has valid E*TRADE keys that are not shareable
-options.useSandbox = true;               // Please don't run this against the live servers
+//options.useSandbox = false;               // Please don't run this against the live servers
 
 // A basic test harness for running tests with a little bit of shared state
 var TestHarness = function()
@@ -39,7 +39,7 @@ var testHarness = new TestHarness();
 
 var testModules = [ require('./tests/authorization.js'),
                     require('./tests/accounts.js'),
-                    require('./tests/order.js'),
+                    //require('./tests/order.js'),
                     require('./tests/market.js')];
 
 for (var index = 0; index < testModules.length; ++index)
