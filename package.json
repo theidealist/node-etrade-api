@@ -1,6 +1,6 @@
 {
-  "name": "etrade",
-  "version": "0.0.1",
+  "name": "node-etrade-api",
+  "version": "0.9.0",
   "description": "Use E*TRADE's REST API",
   "main": "index.js",
   "scripts": {
