@@ -40,7 +40,7 @@ et.getRequestToken(
     // data, paste the E*TRADE provided verification
     // code back into your application.
     console.log("Please have your client visit " + 
-                authorizationURL + 
+                authorizationUrl + 
                 " to authorize your service"); },
   function(error) { 
     console.log("Error encountered while attempting " +
