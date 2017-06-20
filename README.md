@@ -12,6 +12,7 @@ var etrade = require('etrade');
 var configuration = 
 {
   useSandbox : true|false, // true if not provided
+  verboseLogging: true|false, //true if not provided
   key : 'your_key',
   secret : 'your_secret'
 }
