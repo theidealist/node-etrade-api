@@ -13,7 +13,8 @@ var configuration =
 {
   useSandbox : true|false, // true if not provided
   key : 'your_key',
-  secret : 'your_secret'
+  secret : 'your_secret',
+  verboseLogging: true|false // true if not provided
 }
 
 var et = new etrade(configuration);
